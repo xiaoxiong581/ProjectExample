@@ -13,8 +13,11 @@ public class KafkaProducerAdapter extends Thread {
 
     private String topic;
 
-    public KafkaProducerAdapter(String url, String topic) {
+    private int sendMessageNum;
+
+    public KafkaProducerAdapter(String url, String topic, int sendMessageNum) {
         this.topic = topic;
+        this.sendMessageNum = sendMessageNum;
         Properties props = new Properties();
         props.put("bootstrap.servers", url);
         props.put("acks", "all");
@@ -25,16 +28,21 @@ public class KafkaProducerAdapter extends Thread {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<>(props);
+        System.out.println("init kafka producer, bootstrapServer: " + url);
     }
 
     @Override
     public void run() {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < sendMessageNum; i++) {
             String currentStr = String.valueOf(i);
             String key = currentStr;
             String value = currentStr;
             System.out.printf("send message to kafka, topic: %s, key: %s, value: %s\n", topic, key, value);
             producer.send(new ProducerRecord<>(topic, key, value));
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+            }
         }
         producer.close();
     }

@@ -27,6 +27,7 @@ public class KafkaConsumerAdapter extends Thread {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(topic));
+        System.out.println("init kafka consumer, bootstrapServer: " + url);
     }
 
     @Override
