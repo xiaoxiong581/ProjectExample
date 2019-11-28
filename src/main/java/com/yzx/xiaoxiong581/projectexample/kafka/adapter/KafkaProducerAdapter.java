@@ -1,9 +1,11 @@
 package com.yzx.xiaoxiong581.projectexample.kafka.adapter;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * @author xiaoxiong581
@@ -13,15 +15,15 @@ public class KafkaProducerAdapter extends Thread {
 
     private String topic;
 
-    private int sendMessageNum;
+    private String producerInfo;
 
-    public KafkaProducerAdapter(String url, String topic, int sendMessageNum) {
+    public KafkaProducerAdapter(String url, String topic, String producerInfo) {
         this.topic = topic;
-        this.sendMessageNum = sendMessageNum;
+        this.producerInfo = producerInfo;
         Properties props = new Properties();
         props.put("bootstrap.servers", url);
         props.put("acks", "all");
-        props.put("retries", 0);
+        props.put("retries", 3);
         props.put("batch.size", 16384);
         props.put("linger.ms", 1);
         props.put("buffer.memory", 33554432);
@@ -33,17 +35,41 @@ public class KafkaProducerAdapter extends Thread {
 
     @Override
     public void run() {
-        for (int i = 0; i < sendMessageNum; i++) {
-            String currentStr = String.valueOf(i);
-            String key = currentStr;
-            String value = currentStr;
-            System.out.printf("send message to kafka, topic: %s, key: %s, value: %s\n", topic, key, value);
-            producer.send(new ProducerRecord<>(topic, key, value));
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
+        int sendMessageNum = 10000;
+        int valueLength = 32;
+        String[] producerInfos = producerInfo.split(":");
+        if (1 <= producerInfos.length) {
+            sendMessageNum = Integer.parseInt(producerInfos[0]);
+        }
+
+        if (2 <= producerInfos.length) {
+            valueLength = Integer.parseInt(producerInfos[1]);
+        }
+
+        String value = RandomStringUtils.randomAlphanumeric(valueLength);
+
+        if (0 == sendMessageNum) {
+            while (true) {
+                sendMessage(value);
             }
         }
+
+        for (int i = 0; i < sendMessageNum; i++) {
+            sendMessage(value);
+        }
         producer.close();
+    }
+
+    private void sendMessage(String value) {
+        String key = UUID.randomUUID().toString();
+
+        try {
+            producer.send(new ProducerRecord<>(topic, key, value));
+            System.out.printf("send message to kafka, topic: %s, key: %s, value: %s\n", topic, key, value);
+        } catch (Exception e) {
+            System.out
+                    .printf("catch exception when s, topic: %s, key: %s, value: %s, exception: %s\n", topic, key, value,
+                            e.getMessage());
+        }
     }
 }
