@@ -1,11 +1,13 @@
 package com.yzx.xiaoxiong581.projectexample.kafka.adapter;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -27,7 +29,8 @@ public class KafkaConsumerAdapter extends Thread {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(topic));
-        System.out.println("init kafka consumer, bootstrapServer: " + url);
+        System.out.printf("%s init kafka consumer, bootstrapServer: %s\n",
+                DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"), url);
     }
 
     @Override
@@ -37,7 +40,8 @@ public class KafkaConsumerAdapter extends Thread {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<String, String> record : records) {
                     System.out
-                            .printf("receive message from kafka, topic: %s, key: %s, value: %s, partition: %d, offset: %d\n",
+                            .printf("%s receive, topic: %s, key: %s, value: %s, partition: %d, offset: %d\n",
+                                    DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"),
                                     topic,
                                     record.key(), record.value(), record.partition(), record.offset());
                 }

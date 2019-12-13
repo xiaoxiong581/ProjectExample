@@ -29,6 +29,7 @@ public class KafkaFunctionMain {
 
         KafkaConsumerAdapter consumerAdapter = new KafkaConsumerAdapter(kafkaBootstrapServer, topic, consumerGroupId);
         consumerAdapter.start();
+        Thread.sleep(10000);
         KafkaProducerAdapter producerAdapter = new KafkaProducerAdapter(kafkaBootstrapServer, topic, producerInfo);
         producerAdapter.start();
     }
