@@ -3,6 +3,8 @@ package com.yzx.xiaoxiong581.projectexample.kafka;
 import com.yzx.xiaoxiong581.projectexample.kafka.adapter.KafkaConsumerAdapter;
 import com.yzx.xiaoxiong581.projectexample.kafka.adapter.KafkaProducerAdapter;
 
+import java.util.stream.IntStream;
+
 public class KafkaFunctionMain {
     public static void main(String[] args) throws Exception {
         String kafkaBootstrapServer = "localhost:9092";
@@ -29,7 +31,15 @@ public class KafkaFunctionMain {
 
         KafkaConsumerAdapter consumerAdapter = new KafkaConsumerAdapter(kafkaBootstrapServer, topic, consumerGroupId);
         consumerAdapter.start();
-        Thread.sleep(10000);
+        System.out.println("wait producer to start");
+        IntStream.range(1, 11).forEach(i -> {
+            try {
+                System.out.println(i);
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
+        });
         KafkaProducerAdapter producerAdapter = new KafkaProducerAdapter(kafkaBootstrapServer, topic, producerInfo);
         producerAdapter.start();
     }
